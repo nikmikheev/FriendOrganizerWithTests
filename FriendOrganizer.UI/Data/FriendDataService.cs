@@ -1,9 +1,8 @@
-﻿using System;
-using FriendOrganizer.DataAccess;
+﻿using FriendOrganizer.DataAccess;
 using FriendOrganizer.Model;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FriendOrganizer.UI.Data
@@ -16,12 +15,12 @@ namespace FriendOrganizer.UI.Data
         {
             _contextCreator = contextCreator;
         }
-        public async Task<List<Friend>> GetAllAsync()
+        public async Task<Friend> GetByIdAsync(int friendId)
         {
 //            yield return new Friend { FirstName = "Thomas", LastName = "Huber" };
             using (var ctx = _contextCreator())
             {
-                return await ctx.Friends.AsNoTracking().ToListAsync();
+                return await ctx.Friends.AsNoTracking().SingleAsync(f=>f.Id==friendId); 
             }
 
 
