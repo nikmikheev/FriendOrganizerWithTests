@@ -5,7 +5,7 @@ namespace FriendOrganizer.UI.ViewModel
     public class MainViewModel : ViewModelBase
     {
         public INavigationViewModel NavigationViewModel { get;}
-        public IFriendDetailViewModel FriendDetailViewModel { get; set; }
+        public IFriendDetailViewModel FriendDetailViewModel { get;}
 
         public MainViewModel(INavigationViewModel navigationViewModel, 
                              IFriendDetailViewModel friendDetailViewModel)

@@ -1,6 +1,8 @@
-﻿namespace FriendOrganizer.Model
+﻿using System.ComponentModel;
+
+namespace FriendOrganizer.Model
 {
-    public class LookupItem
+    public class LookupItem : INotifyPropertyChanged
     {
         public int Id { get; set; }
 
