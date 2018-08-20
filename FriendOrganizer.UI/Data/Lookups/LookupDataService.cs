@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FriendOrganizer.DataAccess;
 using FriendOrganizer.Model;
 
-namespace FriendOrganizer.UI.Data
+namespace FriendOrganizer.UI.Data.Lookups
 {
-    public class LookupDataService : IFriendLookupDataService
+    public class LookupDataService : IFriendLookupDataService, IProgrammingLanguageLookupDataService
     {
         private Func<FriendOrganizerDBContext> _contextCreator;
 
@@ -17,22 +16,37 @@ namespace FriendOrganizer.UI.Data
         {
             _contextCreator = contextCreator;
         }
+
         public async Task<List<LookupItem>> GetFriendLookupAsync()
         {
             //            yield return new Friend { FirstName = "Thomas", LastName = "Huber" };
             using (var ctx = _contextCreator())
             {
                 return await ctx.Friends.AsNoTracking()
-                    .Select(f=> new LookupItem
+                    .Select(f => new LookupItem
                     {
                         Id = f.Id,
-                        DisplayMember= f.FirstName + " " + f.LastName
+                        DisplayMember = f.FirstName + " " + f.LastName
 
                     })
                     .ToListAsync();
             }
-
-
         }
+
+        public async Task<List<LookupItem>> GetProgrammingLanguageLookupAsync()
+        {
+            using (var ctx = _contextCreator())
+            {
+                return await ctx.ProgrammingLanguages.AsNoTracking()
+                    .Select(f => new LookupItem
+                    {
+                        Id = f.Id,  
+                        DisplayMember = f.Name
+
+                    })
+                    .ToListAsync();
+            }
+        }
+
     }
 }

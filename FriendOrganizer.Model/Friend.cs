@@ -16,11 +16,17 @@ namespace FriendOrganizer.Model
         [StringLength(50)]
         public string FirstName { get; set; }
 
+        [Required]
         [StringLength(50)]
         public string LastName { get; set; }
 
         [StringLength(100)]
+        [EmailAddress]
         public string Email{ get; set; }
+
+        public int? FavoriteLanguageId{ get; set; }
+
+        public ProgrammingLanguage FavoriteLanguage{ get; set; }
 
     }
 }

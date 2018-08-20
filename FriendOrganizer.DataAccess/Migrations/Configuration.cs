@@ -29,6 +29,16 @@ namespace FriendOrganizer.DataAccess.Migrations
                     new Friend { FirstName = "Nikolay", LastName = "Mikheeev", Email = "n.mikheev@magicsoft.ru"}
                     
                 );
+
+            context.ProgrammingLanguages.AddOrUpdate(
+                pl=>pl.Name,
+                new ProgrammingLanguage { Name = "SQL" },
+                new ProgrammingLanguage { Name = "JavaScript" },
+                new ProgrammingLanguage { Name = "C#" },
+                new ProgrammingLanguage { Name = "Java" },
+                new ProgrammingLanguage { Name = "Python" },
+                new ProgrammingLanguage { Name = "Swift" }
+                );
         }
     }
 }
