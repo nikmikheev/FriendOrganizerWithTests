@@ -24,7 +24,7 @@ namespace FriendOrganizer.UI.Startup
             builder.RegisterType<FriendDetailViewModel>().As<IFriendDetailViewModel>();
             builder.RegisterType<MainViewModel>().AsSelf();
             builder.RegisterType<FriendRepository>().AsImplementedInterfaces();
-            builder.RegisterType<LookupDataService>().As<IFriendLookupDataService>();
+            builder.RegisterType<LookupDataService>().AsImplementedInterfaces();
 
             return builder.Build();
         }
