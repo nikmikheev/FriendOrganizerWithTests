@@ -1,50 +1,36 @@
 ﻿using FriendOrganizer.DataAccess;
 using FriendOrganizer.Model;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Threading.Tasks;
 
 namespace FriendOrganizer.UI.Data.Repositories
 {
-    public class FriendRepository : IFriendRepository
+    public class FriendRepository : GenericRepository<Friend, FriendOrganizerDBContext>, IFriendRepository
     {
-        private FriendOrganizerDBContext _context;
-
-        public FriendRepository(FriendOrganizerDBContext context)
+        public FriendRepository(FriendOrganizerDBContext context) : base(context)
         {
-            _context = context;
+            
         }
 
-        public void Add(Friend friend)
+        public override async Task<Friend> GetByIdAsync(int friendId)
         {
-            _context.Friends.Add(friend);
-                
+            return await Context.Friends
+                .Include(f=>f.PhoneNumbers)
+                .SingleAsync(f=>f.Id==friendId); 
         }
 
-        public async Task<Friend> GetByIdAsync(int friendId)
+        public void RemovePhoneNumber(FriendPhoneNumber model)
         {
-//            yield return new Friend { FirstName = "Thomas", LastName = "Huber" };
-            return await _context.Friends.SingleAsync(f=>f.Id==friendId); 
+            Context.FriendPhoneNumbers.Remove(model);
         }
 
-        public bool HasChanges()
-        {
-            return _context.ChangeTracker.HasChanges();
-        }
-
-        public void Remove(Friend friend)
-        {
-           _context.Friends.Remove(friend);
-        }
-
-        //        public async Task SaveAsync(Friend friend)
-        // Контекст уже задан, нужны йпараметру клиента установлен при первом чтении друга
-        public async Task SaveAsync()
-        {
-            //            _context.Friends.Attach(friend);
-            //            _context.Entry(friend).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
+        // public async Task SaveAsync(Friend friend)
+        // Контекст уже задан, нужный параметр у клиента установлен при первом чтении друга
+        //        public async Task SaveAsync()
+        //{
+          ////            _context.Friends.Attach(friend);
+          // //            _context.Entry(friend).State = EntityState.Modified;
+        //    await _context.SaveChangesAsync();
+        //}
     }
 }

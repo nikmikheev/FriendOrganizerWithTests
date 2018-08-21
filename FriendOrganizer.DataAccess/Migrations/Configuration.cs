@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FriendOrganizer.Model;
 
 namespace FriendOrganizer.DataAccess.Migrations
@@ -39,6 +40,29 @@ namespace FriendOrganizer.DataAccess.Migrations
                 new ProgrammingLanguage { Name = "Python" },
                 new ProgrammingLanguage { Name = "Swift" }
                 );
+
+            context.SaveChanges();
+
+            context.FriendPhoneNumbers.AddOrUpdate(
+                ph=> ph.Number,
+                new FriendPhoneNumber {Number = "+64 1231234", FriendId = context.Friends.First().Id});
+
+            context.Meetings.AddOrUpdate(
+                m=>m.Title,
+                new Meeting
+                {
+                    Title = "Meeting C#",
+                    DateFrom = new DateTime(2018, 08, 20),
+                    DateTo = new DateTime(2018,08,24),
+                    Friends = new List<Friend>
+                    {
+                        context.Friends.Single(f=>f.FirstName == "Thomas" && f.LastName == "Huber" ),
+                        context.Friends.Single(f=>f.FirstName == "Nikolay" && f.LastName == "Mikheeev")
+                    }
+
+                }
+                );
+
         }
     }
 }

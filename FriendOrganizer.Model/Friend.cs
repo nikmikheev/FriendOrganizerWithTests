@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,7 +10,14 @@ using System.Threading.Tasks;
 namespace FriendOrganizer.Model
 {
     public class Friend 
-    {   [Key]
+
+    {
+        public Friend()
+        {
+            PhoneNumbers = new Collection<FriendPhoneNumber>();
+            Meetings = new Collection<Meeting>();
+        }
+        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -27,6 +35,10 @@ namespace FriendOrganizer.Model
         public int? FavoriteLanguageId{ get; set; }
 
         public ProgrammingLanguage FavoriteLanguage{ get; set; }
+
+        public ICollection<FriendPhoneNumber> PhoneNumbers { get; set; }
+
+        public ICollection<Meeting> Meetings { get; set; }
 
     }
 }

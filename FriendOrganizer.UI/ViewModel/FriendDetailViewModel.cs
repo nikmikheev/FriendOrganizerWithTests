@@ -1,22 +1,25 @@
-﻿using System.Collections.ObjectModel;
-using FriendOrganizer.Model;
+﻿using FriendOrganizer.Model;
+using FriendOrganizer.UI.Data.Lookups;
 using FriendOrganizer.UI.Data.Repositories;
 using FriendOrganizer.UI.Event;
 using FriendOrganizer.UI.View.Services;
 using FriendOrganizer.UI.Wrapper;
 using Prism.Commands;
 using Prism.Events;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using FriendOrganizer.UI.Data.Lookups;
 
 namespace FriendOrganizer.UI.ViewModel
 {
-    class FriendDetailViewModel : ViewModelBase, IFriendDetailViewModel
+    class FriendDetailViewModel : DetailViewModelBase, IFriendDetailViewModel
     {
-        public FriendWrapper _friend;
+        private FriendWrapper _friend;
+        private FriendPhoneNumberWrapper _selectedPhoneNumber;
         private IFriendRepository _friendRepository;
-        private IEventAggregator _eventAggregator;
         private bool _hasChanged;
         private IMessageDialogService _messageDialog;
         private IProgrammingLanguageLookupDataService _programmingLanguageLookupDataService;
@@ -25,17 +28,20 @@ namespace FriendOrganizer.UI.ViewModel
                                     IEventAggregator eventAggregator,
                                     IMessageDialogService messageDialog,
             IProgrammingLanguageLookupDataService programmingLanguageLookupDataService)
+        : base(eventAggregator)
         {
-            _eventAggregator = eventAggregator;
             _friendRepository = friendRepository;
             _messageDialog = messageDialog;
             _programmingLanguageLookupDataService = programmingLanguageLookupDataService;
 
-            SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
-            DeleteCommand = new DelegateCommand(OnDeleteExecute, OnDeleteCanExecute);
+            AddPhoneNumberCommand = new DelegateCommand(OnAddPhoneNumberExecute);
+            RemovePhoneNumberCommand = new DelegateCommand(OnRemovePhoneNumberExecute, OnRemovePhoneNumberCanExecute);
+//            RemovePhoneNumberCommand = new DelegateCommand(OnRemovePhoneNumberExecute);
 
             ProgrammingLanguages = new ObservableCollection<LookupItem>();
-        } 
+            PhoneNumbers = new ObservableCollection<FriendPhoneNumberWrapper>();
+        }
+
 
         public FriendWrapper Friend
         {
@@ -50,7 +56,7 @@ namespace FriendOrganizer.UI.ViewModel
             }
         }
 
-        public async Task LoadAsync(int? friendId)
+        public override async Task LoadAsync(int? friendId)
         {
             var friend = friendId.HasValue
                 ? await _friendRepository.GetByIdAsync(friendId.Value)
@@ -58,7 +64,41 @@ namespace FriendOrganizer.UI.ViewModel
 
             InitializeFriend(friend);
 
+            InitializeFriendPhoneNumbers(friend.PhoneNumbers);
+
             await LoadProgrammingLanguagesLookupAsync();
+
+        }
+
+        private void InitializeFriendPhoneNumbers(ICollection<FriendPhoneNumber> friendPhoneNumbers)
+        {
+            foreach (var wrapper in PhoneNumbers)
+            {
+                wrapper.PropertyChanged -= FriendPhoneNumberWrapper_PropertyChanged;
+            }
+
+            PhoneNumbers.Clear();
+            foreach (var friendPhoneNumber in friendPhoneNumbers)
+            {
+                var wrapper = new FriendPhoneNumberWrapper(friendPhoneNumber);
+                PhoneNumbers.Add(wrapper);
+                wrapper.PropertyChanged += FriendPhoneNumberWrapper_PropertyChanged;
+            }
+    
+            ;
+        }
+
+        private void FriendPhoneNumberWrapper_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (!HasChanges)
+            {
+                HasChanges = _friendRepository.HasChanges();
+            }
+
+            if (e.PropertyName == nameof(FriendPhoneNumberWrapper.HasErrors))
+            {
+                ((DelegateCommand) SaveCommand).RaiseCanExecuteChanged();
+            }
 
         }
 
@@ -98,57 +138,49 @@ namespace FriendOrganizer.UI.ViewModel
             }
         }
 
-        public bool HasChanges
-        {
-            get { return _hasChanged; }
-            set
-            {
-                if (_hasChanged != value)
-                {
-                    _hasChanged = value;
-                    OnPropertyChanged();
-                    ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+        public ICommand AddPhoneNumberCommand { get; }
 
-                }
-            }
-        }
-
-        public ICommand SaveCommand { get; }
-
-        public ICommand DeleteCommand { get; }
+        public ICommand RemovePhoneNumberCommand { get; }
 
         public ObservableCollection<LookupItem> ProgrammingLanguages { get;}
 
-        private bool OnSaveCanExecute()
+        public ObservableCollection<FriendPhoneNumberWrapper> PhoneNumbers { get; }
+
+        public FriendPhoneNumberWrapper SelectedPhoneNumber
         {
-            return (Friend != null) && (!Friend.HasErrors) && HasChanges;
+            get { return _selectedPhoneNumber; }
+            set
+            {
+                _selectedPhoneNumber = value; 
+                OnPropertyChanged();
+                ((DelegateCommand) RemovePhoneNumberCommand).RaiseCanExecuteChanged();
+            }
         }
 
-        private async void OnSaveExecute()
+        protected override bool OnSaveCanExecute()
+        {
+            return (Friend != null)
+                   && (!Friend.HasErrors)
+                   && PhoneNumbers.All(pn => !pn.HasErrors)
+                   && HasChanges;
+        }
+
+        protected override async void OnSaveExecute()
         {
             await _friendRepository.SaveAsync();
             HasChanges = _friendRepository.HasChanges();
-
-            _eventAggregator.GetEvent<AfterFriendSaveEvent>().Publish(new AfterFriendSaveEventArgs
-            {
-                Id = Friend.Id,
-                DisplayMember = $"{Friend.FirstName} {Friend.LastName}"
-            });
+            RaiseDetailSavedEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
         }
 
-        private bool OnDeleteCanExecute()
-        {
-            return (Friend != null);
-        }
-
-        private async void OnDeleteExecute()
+        protected override async void OnDeleteExecute()
         {
             var result = _messageDialog.ShowOkCancelDialog($"You really want to delete friend '{Friend.FirstName} {Friend.LastName}'?", "Question");
             if (result == MessageDialogResult.OK)
             {
                 _friendRepository.Remove(Friend.Model);
                 await _friendRepository.SaveAsync();
-                _eventAggregator.GetEvent<AfterFriendDeletedEvent>().Publish(Friend.Id);
+
+                RaiseDetailDeletedEvent(Friend.Id);
             }
         }
 
@@ -157,6 +189,30 @@ namespace FriendOrganizer.UI.ViewModel
             var friend = new Friend();
             _friendRepository.Add(friend);
             return friend;
+        }
+
+        private bool OnRemovePhoneNumberCanExecute()
+        {
+            return (SelectedPhoneNumber != null);
+        }
+
+        private void OnRemovePhoneNumberExecute()
+        {
+            SelectedPhoneNumber.PropertyChanged -= FriendPhoneNumberWrapper_PropertyChanged;
+            _friendRepository.RemovePhoneNumber(SelectedPhoneNumber.Model);
+            PhoneNumbers.Remove(SelectedPhoneNumber);
+            SelectedPhoneNumber = null;
+            HasChanges = _friendRepository.HasChanges();
+            ((DelegateCommand) SaveCommand).RaiseCanExecuteChanged();
+        }
+
+        private void OnAddPhoneNumberExecute()
+        {
+            var newNumber = new FriendPhoneNumberWrapper( new FriendPhoneNumber());
+            newNumber.PropertyChanged += FriendPhoneNumberWrapper_PropertyChanged;
+            PhoneNumbers.Add(newNumber);
+            Friend.Model.PhoneNumbers.Add(newNumber.Model);
+            newNumber.Number = ""; // trigger validation :) 
         }
 
     }

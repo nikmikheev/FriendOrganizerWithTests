@@ -56,6 +56,14 @@
     <Compile Include="Migrations\201808200150249_AddProgrammingLanguege.Designer.cs">
       <DependentUpon>201808200150249_AddProgrammingLanguege.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201808200521236_AddPhoneNumber.cs" />
+    <Compile Include="Migrations\201808200521236_AddPhoneNumber.Designer.cs">
+      <DependentUpon>201808200521236_AddPhoneNumber.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201808211007413_AddMeetings.cs" />
+    <Compile Include="Migrations\201808211007413_AddMeetings.Designer.cs">
+      <DependentUpon>201808211007413_AddMeetings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -75,6 +83,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201808200150249_AddProgrammingLanguege.resx">
       <DependentUpon>201808200150249_AddProgrammingLanguege.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201808200521236_AddPhoneNumber.resx">
+      <DependentUpon>201808200521236_AddPhoneNumber.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201808211007413_AddMeetings.resx">
+      <DependentUpon>201808211007413_AddMeetings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

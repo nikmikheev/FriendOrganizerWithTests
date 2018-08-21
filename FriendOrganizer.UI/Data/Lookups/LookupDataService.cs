@@ -10,7 +10,7 @@ namespace FriendOrganizer.UI.Data.Lookups
 {
     public class LookupDataService : IFriendLookupDataService, IProgrammingLanguageLookupDataService
     {
-        private Func<FriendOrganizerDBContext> _contextCreator;
+        private readonly Func<FriendOrganizerDBContext> _contextCreator;
 
         public LookupDataService(Func<FriendOrganizerDBContext> contextCreator)
         {
