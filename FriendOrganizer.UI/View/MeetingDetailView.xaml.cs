@@ -3,11 +3,11 @@
 namespace FriendOrganizer.UI.View
 {
     /// <summary>
-    /// Interaction logic for FriendDetailView.xaml
+    /// Interaction logic for MeetingDetailView.xaml
     /// </summary>
-    public partial class FriendDetailView : UserControl
+    public partial class MeetingDetailView : UserControl
     {
-        public FriendDetailView()
+        public MeetingDetailView()
         {
             InitializeComponent();
         }

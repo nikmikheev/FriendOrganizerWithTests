@@ -19,6 +19,11 @@ namespace FriendOrganizer.UI.View.Services
 
         }
 
+        public void ShowInfoDialog(string message)
+        {
+            MessageBox.Show(message, "Info");
+        }
+
     }
 
     public enum MessageDialogResult
