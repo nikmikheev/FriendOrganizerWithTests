@@ -1,8 +1,12 @@
-﻿using FriendOrganizer.UI.Event;
+﻿using System;
+using System.Data.Entity.Infrastructure;
+using System.Linq;
+using FriendOrganizer.UI.Event;
 using Prism.Commands;
 using Prism.Events;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FriendOrganizer.Model;
 using FriendOrganizer.UI.View.Services;
 
 namespace FriendOrganizer.UI.ViewModel
@@ -71,6 +75,42 @@ namespace FriendOrganizer.UI.ViewModel
 
         protected abstract void OnSaveExecute();
 
+        protected async Task SaveWithOptimisticConcurrencyExecute(Func<Task> SaveFunc, Action AfterSaveAction)
+        {
+            try
+            {
+                await SaveFunc();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                var databaseValues = ex.Entries.Single().GetDatabaseValues();
+                if (databaseValues == null)
+                {
+                    MessageDialogService.ShowInfoDialog($"Entity has been deleted from database by another user.");
+                    RaiseDetailDeletedEvent(Id);
+                    return;
+                }
+
+                var result = MessageDialogService.ShowOkCancelDialog($"Record changed on server. " +
+                                                                     $"Ok- save record anyway, " +
+                                                                     $"Cancel - reload data from database", "Concurrency Error!");
+                if (result == MessageDialogResult.OK)
+                {// Update database values with user values
+                    var entry = ex.Entries.Single();
+                    entry.OriginalValues.SetValues(entry.GetDatabaseValues());
+                    await SaveFunc();
+                }
+                else
+                {
+                    await ex.Entries.Single().ReloadAsync();
+                    await LoadAsync(Id);
+                }
+            }
+
+            AfterSaveAction();
+        }
+
+
         protected abstract void OnDeleteMeetingExecute();
 
         protected virtual void OnCloseDetailViewExecute()
@@ -111,5 +151,15 @@ namespace FriendOrganizer.UI.ViewModel
                     ViewModelName = this.GetType().Name
                 });
         }
+
+        protected virtual void RaiseCollectionSaveEvent()
+        {
+            _eventAggregator.GetEvent<AfterCollectionSaveEvent>().Publish(
+                new AfterCollectionSaveEventArgs()
+                {
+                    ViewModelName = this.GetType().Name
+                });
+        }
+
     }
 }

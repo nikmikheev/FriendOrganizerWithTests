@@ -9,6 +9,7 @@ using Prism.Events;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -31,6 +32,7 @@ namespace FriendOrganizer.UI.ViewModel
             _friendRepository = friendRepository;
             _programmingLanguageLookupDataService = programmingLanguageLookupDataService;
 
+            eventAggregator.GetEvent<AfterCollectionSaveEvent>().Subscribe(AfterCollectionSaveExecute);
             AddPhoneNumberCommand = new DelegateCommand(OnAddPhoneNumberExecute);
             RemovePhoneNumberCommand = new DelegateCommand(OnRemovePhoneNumberExecute, OnRemovePhoneNumberCanExecute);
 //            RemovePhoneNumberCommand = new DelegateCommand(OnRemovePhoneNumberExecute);
@@ -39,7 +41,7 @@ namespace FriendOrganizer.UI.ViewModel
             PhoneNumbers = new ObservableCollection<FriendPhoneNumberWrapper>();
         }
 
-
+     
         public FriendWrapper Friend
         {
             get
@@ -132,23 +134,6 @@ namespace FriendOrganizer.UI.ViewModel
           SetTitle();
         }
 
-        private void SetTitle()
-        {
-            Title = $"F:{Friend.FirstName} {Friend.LastName}";
-        }
-
-        private async Task LoadProgrammingLanguagesLookupAsync()
-        {
-            ProgrammingLanguages.Clear();
-            ProgrammingLanguages.Add(new NullLookupItem{DisplayMember = "No"} );
-            var lookup = await _programmingLanguageLookupDataService.GetProgrammingLanguageLookupAsync();
-
-            foreach (var lookupitem in lookup)
-            {
-                ProgrammingLanguages.Add(lookupitem);
-            }
-        }
-
         public ICommand AddPhoneNumberCommand { get; }
 
         public ICommand RemovePhoneNumberCommand { get; }
@@ -178,10 +163,13 @@ namespace FriendOrganizer.UI.ViewModel
 
         protected override async void OnSaveExecute()
         {
-            await _friendRepository.SaveAsync();
-            HasChanges = _friendRepository.HasChanges();
-            Id = Friend.Id;
-            RaiseDetailSavedEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
+            await SaveWithOptimisticConcurrencyExecute(_friendRepository.SaveAsync,
+                () =>
+                {
+                    HasChanges = _friendRepository.HasChanges();
+                    Id = Friend.Id;
+                    RaiseDetailSavedEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
+                });
         }
 
         protected override async void OnDeleteMeetingExecute()
@@ -209,6 +197,23 @@ namespace FriendOrganizer.UI.ViewModel
             return friend;
         }
 
+        private void SetTitle()
+        {
+            Title = $"F:{Friend.FirstName} {Friend.LastName}";
+        }
+
+        private async Task LoadProgrammingLanguagesLookupAsync()
+        {
+            ProgrammingLanguages.Clear();
+            ProgrammingLanguages.Add(new NullLookupItem { DisplayMember = "No" });
+            var lookup = await _programmingLanguageLookupDataService.GetProgrammingLanguageLookupAsync();
+
+            foreach (var lookupitem in lookup)
+            {
+                ProgrammingLanguages.Add(lookupitem);
+            }
+        }
+
         private bool OnRemovePhoneNumberCanExecute()
         {
             return (SelectedPhoneNumber != null);
@@ -233,5 +238,12 @@ namespace FriendOrganizer.UI.ViewModel
             newNumber.Number = ""; // trigger validation :) 
         }
 
+        private async void AfterCollectionSaveExecute(AfterCollectionSaveEventArgs args)
+        {
+            if (args.ViewModelName == nameof(ProgrammingLanguageDetailViewModel))
+            {
+                await LoadProgrammingLanguagesLookupAsync();
+            }
+        }
     }
 }

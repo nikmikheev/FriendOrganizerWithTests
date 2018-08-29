@@ -93,7 +93,10 @@
     <Compile Include="Data\Repositories\GenericRepository.cs" />
     <Compile Include="Data\Repositories\IGenericRepository.cs" />
     <Compile Include="Data\Repositories\IMeetingRepository.cs" />
+    <Compile Include="Data\Repositories\IProgrammingLanguageRepository.cs" />
     <Compile Include="Data\Repositories\MeetingRepository.cs" />
+    <Compile Include="Data\Repositories\ProgrammingLanguageRepository.cs" />
+    <Compile Include="Event\AfterCollectionSaveEvent.cs" />
     <Compile Include="Event\AfterDetailDeletedEvent.cs" />
     <Compile Include="Event\AfterDetailSaveEvent.cs" />
     <Compile Include="Event\CloseDetailViewEvent.cs" />
@@ -103,6 +106,7 @@
     <Compile Include="ViewModel\IMeetingDetailViewModel.cs" />
     <Compile Include="ViewModel\MeetingDetailViewModel.cs" />
     <Compile Include="ViewModel\ProgrammingLanguageDetailViewModel.cs" />
+    <Compile Include="Wrapper\ProgrammingLanguageWrapper.cs" />
     <Compile Include="View\MeetingDetailView.xaml.cs">
       <DependentUpon>MeetingDetailView.xaml</DependentUpon>
     </Compile>
