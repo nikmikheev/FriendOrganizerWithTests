@@ -22,7 +22,7 @@ namespace FriendOrganizer.UI.ViewModel
             IIndex<string, IDetailViewModel> detailViewModelCreator,
                             IEventAggregator eventAggregator,
                             IMessageDialogService messageDialog)
-        {
+        { 
             NavigationViewModel = navigationViewModel;
             _detailViewModelCreator = detailViewModelCreator;
 
@@ -101,7 +101,7 @@ namespace FriendOrganizer.UI.ViewModel
                 {
                     await detailViewModel.LoadAsync(args.Id);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     _messageDialog.ShowInfoDialog("Could not load entity, may be it was deleted from database.Reloading data... ");
                     await NavigationViewModel.LoadAsync();
@@ -123,9 +123,9 @@ namespace FriendOrganizer.UI.ViewModel
             RemoveDetailViewModel(args.Id, args.ViewModelName);
         }
 
-        private void RemoveDetailViewModel(int Id, string viewModelName)
+        private void RemoveDetailViewModel(int id, string viewModelName)
         {
-            var detailViewModel = DetailViewModels.SingleOrDefault(vm => vm.Id == Id
+            var detailViewModel = DetailViewModels.SingleOrDefault(vm => vm.Id == id
                                           && vm.GetType().Name == viewModelName);
 
             if (detailViewModel != null)

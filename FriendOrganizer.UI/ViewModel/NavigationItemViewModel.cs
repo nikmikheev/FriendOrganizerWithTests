@@ -10,7 +10,7 @@ namespace FriendOrganizer.UI.ViewModel
     {
         public int Id { get; }
         private string _displayMember;
-        private readonly ICommand _openFriendDetailViewCommand;
+        //private readonly ICommand _openFriendDetailViewCommand;
         private IEventAggregator _eventAggregator;
         private string _detailViewModelName;
 
@@ -37,7 +37,7 @@ namespace FriendOrganizer.UI.ViewModel
             }
         }
 
-        public ICommand OpenDetailViewCommand { get; }
+        public ICommand OpenDetailViewCommand { get; private set; }
 
         private void OnOpenDetailView()
         {

@@ -16,6 +16,7 @@ namespace FriendOrganizer.UI.Startup
             var builder = new ContainerBuilder();
 
             builder.RegisterType<EventAggregator>().As<IEventAggregator>().SingleInstance();
+
             builder.RegisterType<MessageDialogService>().As<IMessageDialogService>();
             builder.RegisterType<FriendOrganizerDBContext>().AsSelf();
             builder.RegisterType<MainWindow>().AsSelf();

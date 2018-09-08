@@ -17,7 +17,7 @@ namespace FriendOrganizer.UI.Data.Repositories
         {
             return await Context.Friends
                 .Include(f=>f.PhoneNumbers)
-                .SingleAsync(f=>f.Id==friendId); 
+                .SingleAsync(f =>f.Id==friendId); 
         }
 
         public void RemovePhoneNumber(FriendPhoneNumber model)

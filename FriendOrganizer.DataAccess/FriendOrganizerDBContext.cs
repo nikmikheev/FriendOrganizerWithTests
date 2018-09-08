@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using FriendOrganizer.Model;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using FriendOrganizer.Model;
 
 namespace FriendOrganizer.DataAccess
 {

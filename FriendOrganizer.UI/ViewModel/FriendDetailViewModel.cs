@@ -16,7 +16,7 @@ using System.Windows.Input;
 
 namespace FriendOrganizer.UI.ViewModel
 {
-    class FriendDetailViewModel : DetailViewModelBase, IFriendDetailViewModel
+    public class FriendDetailViewModel : DetailViewModelBase, IFriendDetailViewModel
     {
         private FriendWrapper _friend;
         private FriendPhoneNumberWrapper _selectedPhoneNumber;

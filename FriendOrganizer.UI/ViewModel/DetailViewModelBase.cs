@@ -14,7 +14,7 @@ namespace FriendOrganizer.UI.ViewModel
     public abstract class DetailViewModelBase : ViewModelBase, IDetailViewModel
     {
         private IEventAggregator _eventAggregator;
-        private bool _hasChanged;
+        private bool _hasChanges;
         private int _id;
         private string _title;
         private IMessageDialogService _messageDialogService;
@@ -29,7 +29,11 @@ namespace FriendOrganizer.UI.ViewModel
             CloseDetailViewCommand = new DelegateCommand(OnCloseDetailViewExecute);
         }
 
-        public abstract Task LoadAsync(int Id);
+        public virtual Task LoadAsync(int Id)
+        {
+            this.Id = Id;
+            return null;
+        }
 
         public ICommand SaveCommand { get; private set; }
 
@@ -39,12 +43,12 @@ namespace FriendOrganizer.UI.ViewModel
 
         public bool HasChanges
         {
-            get { return _hasChanged; }
+            get { return _hasChanges; }
             set
             {
-                if (_hasChanged != value)
+                if (_hasChanges != value)
                 {
-                    _hasChanged = value;
+                    _hasChanges = value;
                     OnPropertyChanged();
                     ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
 
